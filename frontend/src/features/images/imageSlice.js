@@ -1,13 +1,11 @@
 import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
 import axiosInstance from '../../utils/axiosConfig';
 
-export const uploadImages = createAsyncThunk(
-  'images/uploadImages',
-  async (formData, { rejectWithValue }) => {
+export const fetchImages = createAsyncThunk(
+  'images/fetchImages',
+  async (_, { rejectWithValue }) => {
     try {
-      const response = await axiosInstance.post('images/', formData, {
-        headers: { 'Content-Type': 'multipart/form-data' }
-      });
+      const response = await axiosInstance.get('images/');
       return response.data;
     } catch (error) {
       return rejectWithValue(error.response.data);
@@ -15,11 +13,13 @@ export const uploadImages = createAsyncThunk(
   }
 );
 
-export const fetchImages = createAsyncThunk(
-  'images/fetchImages',
-  async (_, { rejectWithValue }) => {
+export const uploadImages = createAsyncThunk(
+  'images/uploadImages',
+  async (formData, { rejectWithValue }) => {
     try {
-      const response = await axiosInstance.get('images/');
+      const response = await axiosInstance.post('images/', formData, {
+        headers: { 'Content-Type': 'multipart/form-data' }
+      });
       return response.data;
     } catch (error) {
       return rejectWithValue(error.response.data);
@@ -41,9 +41,11 @@ export const updateImageOrder = createAsyncThunk(
 
 export const updateImage = createAsyncThunk(
   'images/updateImage',
-  async (imageData, { rejectWithValue }) => {
+  async ({ id, formData }, { rejectWithValue }) => {
     try {
-      const response = await axiosInstance.patch(`images/${imageData.id}/`, imageData);
+      const response = await axiosInstance.patch(`images/${id}/`, formData, {
+        headers: { 'Content-Type': 'multipart/form-data' }
+      });
       return response.data;
     } catch (error) {
       return rejectWithValue(error.response.data);
@@ -73,12 +75,11 @@ const imageSlice = createSlice({
   reducers: {},
   extraReducers: (builder) => {
     builder
-      .addCase(uploadImages.pending, (state) => {
-        state.status = 'loading';
-      })
       .addCase(uploadImages.fulfilled, (state, action) => {
         state.status = 'succeeded';
-        state.images = state.images.concat(action.payload);
+        state.images = Array.isArray(action.payload) 
+          ? [...state.images, ...action.payload].sort((a, b) => a.order - b.order)
+          : [...state.images, action.payload].sort((a, b) => a.order - b.order);
       })
       .addCase(uploadImages.rejected, (state, action) => {
         state.status = 'failed';
@@ -89,23 +90,34 @@ const imageSlice = createSlice({
       })
       .addCase(fetchImages.fulfilled, (state, action) => {
         state.status = 'succeeded';
-        state.images = action.payload;
+        state.images = action.payload.map(img => ({
+          ...img,
+          id: String(img.id)
+        }));
       })
       .addCase(fetchImages.rejected, (state, action) => {
         state.status = 'failed';
         state.error = action.payload;
       })
       .addCase(updateImageOrder.fulfilled, (state, action) => {
-        state.images = action.payload;
+        if (Array.isArray(action.payload)) {
+          state.images = action.payload.map(img => ({
+            ...img,
+            id: String(img.id)
+          }));
+        }
       })
       .addCase(updateImage.fulfilled, (state, action) => {
-        const index = state.images.findIndex(img => img.id === action.payload.id);
+        const index = state.images.findIndex(img => img.id === String(action.payload.id));
         if (index !== -1) {
-          state.images[index] = action.payload;
+          state.images[index] = {
+            ...action.payload,
+            id: String(action.payload.id)
+          };
         }
       })
       .addCase(deleteImage.fulfilled, (state, action) => {
-        state.images = state.images.filter(img => img.id !== action.payload);
+        state.images = state.images.filter(img => img.id !== String(action.payload));
       });
   },
 });

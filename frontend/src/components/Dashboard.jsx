@@ -30,8 +30,10 @@ const Dashboard = () => {
           <ImageUpload />
         </div>
         <div>
-          <h2 className="text-2xl font-bold mb-4">Image Gallery</h2>
-          <ImageGallery />
+            <h2 className="text-2xl font-bold mb-4">Image Gallery</h2>
+            <div style={{ height: '100vh', overflowY: 'auto' }}>
+                <ImageGallery />
+            </div>
         </div>
       </div>
     </div>

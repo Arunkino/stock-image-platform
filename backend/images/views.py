@@ -1,16 +1,16 @@
 from rest_framework import viewsets, permissions, status
+from rest_framework.decorators import action
 from rest_framework.response import Response
+from django.db import transaction
 from .models import Image
 from .serializers import ImageSerializer
-from django.db import transaction
-from rest_framework.decorators import action
 
 class ImageViewSet(viewsets.ModelViewSet):
     serializer_class = ImageSerializer
     permission_classes = [permissions.IsAuthenticated]
 
     def get_queryset(self):
-        return Image.objects.filter(user=self.request.user)
+        return Image.objects.filter(user=self.request.user).order_by('order')
 
     def create(self, request, *args, **kwargs):
         images = request.FILES.getlist('image')
@@ -39,7 +39,7 @@ class ImageViewSet(viewsets.ModelViewSet):
         return Response({'status': 'Images reordered successfully'})
 
     def update(self, request, *args, **kwargs):
-        partial = kwargs.pop('partial', False)
+        partial = kwargs.pop('partial', True)  # Always allow partial updates
         instance = self.get_object()
         serializer = self.get_serializer(instance, data=request.data, partial=partial)
         serializer.is_valid(raise_exception=True)
