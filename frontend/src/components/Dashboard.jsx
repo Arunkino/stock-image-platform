@@ -1,13 +1,21 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import { useSelector, useDispatch } from 'react-redux';
 import { logout } from '../features/auth/authSlice';
 import { useNavigate } from 'react-router-dom';
+import ImageUpload from './ImageUpload';
+import { fetchImages } from '../features/images/imageSlice';
 
 const Dashboard = () => {
+
+    
   const { user } = useSelector((state) => state.auth);
   const dispatch = useDispatch();
   const navigate = useNavigate();
-
+  
+  useEffect(() => {
+    const images = dispatch(fetchImages());
+    console.log(images);
+})
   const handleLogout = () => {
     dispatch(logout());
     navigate('/login');
@@ -24,6 +32,9 @@ const Dashboard = () => {
           Logout
         </button>
         {/* Add more dashboard content here */}
+      </div>
+      <div>
+        <ImageUpload/>
       </div>
     </div>
   );
