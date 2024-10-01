@@ -12,6 +12,7 @@ const Register = () => {
     phone_number: '',
     password: '',
   });
+  const [confirmPassword, setConfirmPassword] = useState('');
 
   const dispatch = useDispatch();
   const [isLoading, setIsLoading] = useState(false);
@@ -23,7 +24,10 @@ const Register = () => {
 
   const handleSubmit = (e) => {
     e.preventDefault();
-
+    if (formData.password !== confirmPassword) {
+        toast.error("Passwords don't match");
+        return;
+      }
     setIsLoading(true);
 
     dispatch(register(formData))
@@ -92,6 +96,19 @@ const Register = () => {
                 placeholder="Password"
                 value={formData.password}
                 onChange={handleChange}
+              />
+            </div>
+            <div>
+              <label htmlFor="confirm-password" className="sr-only">Confirm Password</label>
+              <input
+                id="confirm-password"
+                name="confirm-password"
+                type="password"
+                required
+                className="appearance-none rounded-none relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 rounded-b-md focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 focus:z-10 sm:text-sm"
+                placeholder="Confirm Password"
+                value={confirmPassword}
+                onChange={(e) => setConfirmPassword(e.target.value)}
               />
             </div>
           </div>
