@@ -3,6 +3,7 @@
 __pycache__/
 
 # Ignore environment files (optional, if you're using a virtualenv)
+backend/backend/.env
 env/
 venv/
 
