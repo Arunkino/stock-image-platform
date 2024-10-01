@@ -1,0 +1,22 @@
+# Ignore Python bytecode files
+*.pyc
+__pycache__/
+
+# Ignore environment files (optional, if you're using a virtualenv)
+env/
+venv/
+
+# Ignore media files
+media/
+
+# Ignore migration files (optional, to stop tracking migrations)
+*/migrations/*
+!*/migrations/__init__.py
+
+# Ignore Django-related cache and log files (optional)
+*.log
+*.sqlite3
+
+# Ignore IDE-specific files (optional)
+.vscode/
+.idea/
