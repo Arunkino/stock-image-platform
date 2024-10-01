@@ -2,6 +2,8 @@ import React, { useState } from 'react';
 import { useDispatch } from 'react-redux';
 import { register } from '../features/auth/authSlice';
 import { toast } from 'react-hot-toast';
+import { Link, useNavigate } from 'react-router-dom';
+import { LoadingSpinner } from './LoadingSpinner';
 
 const Register = () => {
   const [formData, setFormData] = useState({
@@ -12,6 +14,8 @@ const Register = () => {
   });
 
   const dispatch = useDispatch();
+  const [isLoading, setIsLoading] = useState(false);
+  const navigate = useNavigate()
 
   const handleChange = (e) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
@@ -19,15 +23,25 @@ const Register = () => {
 
   const handleSubmit = (e) => {
     e.preventDefault();
+
+    setIsLoading(true);
+
     dispatch(register(formData))
       .unwrap()
       .then(() => {
+        
         toast.success('Registration successful!');
+        navigate('/')
       })
       .catch((error) => {
         toast.error('Registration failed: ' + JSON.stringify(error));
+      }).finally(() => {
+        setIsLoading(false);
       });
   };
+  {if(isLoading){
+    return(<LoadingSpinner/>)
+  }}
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-gray-50 py-12 px-4 sm:px-6 lg:px-8">
@@ -91,6 +105,11 @@ const Register = () => {
             </button>
           </div>
         </form>
+        <div className="text-sm">
+          <Link to="/login" className="font-medium text-indigo-600 hover:text-indigo-500">
+            Already have an account? Login here
+          </Link>
+        </div>
       </div>
     </div>
   );

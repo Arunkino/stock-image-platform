@@ -1,7 +1,8 @@
 import React, { useState } from 'react';
-import { useDispatch } from 'react-redux';
+import { useDispatch, useSelector } from 'react-redux';
 import { login } from '../features/auth/authSlice';
 import { toast } from 'react-hot-toast';
+import { Link, useNavigate } from 'react-router-dom';
 
 const Login = () => {
   const [formData, setFormData] = useState({
@@ -10,21 +11,22 @@ const Login = () => {
   });
 
   const dispatch = useDispatch();
+  const navigate = useNavigate();
+  const { isLoading, error } = useSelector((state) => state.auth);
 
   const handleChange = (e) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    dispatch(login(formData))
-      .unwrap()
-      .then(() => {
-        toast.success('Login successful!');
-      })
-      .catch((error) => {
-        toast.error('Login failed: ' + JSON.stringify(error));
-      });
+    try {
+      await dispatch(login(formData)).unwrap();
+      toast.success('Login successful!');
+      navigate('/dashboard');
+    } catch (error) {
+      toast.error('Login failed: ' + JSON.stringify(error));
+    }
   };
 
   return (
@@ -59,7 +61,26 @@ const Login = () => {
             </div>
           </div>
 
+          {error && <p className="text-red-500 text-sm">{error}</p>}
+
           <div>
             <button
               type="submit"
-              className="group relative w-full flex justify-center py-2 px-4 border border-transparent text-sm font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring
+              className="group relative w-full flex justify-center py-2 px-4 border border-transparent text-sm font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
+              disabled={isLoading}
+            >
+              {isLoading ? 'Logging in...' : 'Login'}
+            </button>
+          </div>
+        </form>
+        <div className="text-sm">
+          <Link to="/register" className="font-medium text-indigo-600 hover:text-indigo-500">
+            Don't have an account? Register here
+          </Link>
+        </div>
+      </div>
+    </div>
+  );
+};
+
+export default Login;

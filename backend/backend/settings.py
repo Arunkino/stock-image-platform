@@ -39,6 +39,7 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
 
     'rest_framework',
+    'rest_framework.authtoken',
     'corsheaders',
     'users',
     'images',
@@ -134,17 +135,23 @@ STATIC_URL = 'static/'
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
 
-CORS_ALLOWED_ORIGINS = [
-    "http://localhost:5173",  # Vite default port
+# CORS_ALLOWED_ORIGINS = [
+#     "http://localhost:5173",  # Vite default port
 
-]
+# ]
+CORS_ALLOW_ALL_ORIGINS = True  # Temporary, for debugging
+CORS_ALLOW_CREDENTIALS = True
+
 
 # Configure DRF
 REST_FRAMEWORK = {
     'DEFAULT_AUTHENTICATION_CLASSES': [
-        'rest_framework.authentication.SessionAuthentication',
         'rest_framework.authentication.TokenAuthentication',
+        'rest_framework.authentication.SessionAuthentication',
     ],
+    'DEFAULT_PERMISSION_CLASSES': [
+        'rest_framework.permissions.AllowAny',
+    ]
 }
 
 # to use custom user model
