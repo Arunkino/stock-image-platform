@@ -19,6 +19,9 @@ import { Edit2, Trash2, GripVertical } from 'lucide-react';
 import { fetchImages, updateImageOrder, updateImage, deleteImage } from '../features/images/imageSlice';
 import { Dialog, Transition } from '@headlessui/react';
 import toast from 'react-hot-toast';
+import EditModal from './EditModal';
+import { DeleteConfirmationModal } from './DeleteConfirmationModal';
+import EmptyGallery from './EmptyGallery';
 
 const SortableItem = ({ id, image, onEdit, onDelete }) => {
   const {
@@ -53,176 +56,30 @@ const SortableItem = ({ id, image, onEdit, onDelete }) => {
   );
 };
 
-const EditModal = ({ isOpen, closeModal, image, onSave }) => {
-  const [title, setTitle] = useState(image?.title || '');
-  const [newImage, setNewImage] = useState(null);
-
-  useEffect(() => {
-    if (image) {
-      setTitle(image.title);
-      setNewImage(null);
-    }
-  }, [image]);
-
-  const handleSave = () => {
-    onSave({ title, newImage });
-    closeModal();
-  };
-
-  return (
-    <Transition appear show={isOpen} as={React.Fragment}>
-      <Dialog as="div" className="relative z-10" onClose={closeModal}>
-        <Transition.Child
-          as={React.Fragment}
-          enter="ease-out duration-300"
-          enterFrom="opacity-0"
-          enterTo="opacity-100"
-          leave="ease-in duration-200"
-          leaveFrom="opacity-100"
-          leaveTo="opacity-0"
-        >
-          <div className="fixed inset-0 bg-black bg-opacity-25" />
-        </Transition.Child>
-
-        <div className="fixed inset-0 overflow-y-auto">
-          <div className="flex min-h-full items-center justify-center p-4 text-center">
-            <Transition.Child
-              as={React.Fragment}
-              enter="ease-out duration-300"
-              enterFrom="opacity-0 scale-95"
-              enterTo="opacity-100 scale-100"
-              leave="ease-in duration-200"
-              leaveFrom="opacity-100 scale-100"
-              leaveTo="opacity-0 scale-95"
-            >
-              <Dialog.Panel className="w-full max-w-md transform overflow-hidden rounded-2xl bg-white p-6 text-left align-middle shadow-xl transition-all">
-                <Dialog.Title
-                  as="h3"
-                  className="text-lg font-medium leading-6 text-gray-900"
-                >
-                  Edit Image
-                </Dialog.Title>
-                <div className="mt-2">
-                  <input
-                    type="text"
-                    value={title}
-                    onChange={(e) => setTitle(e.target.value)}
-                    className="w-full p-2 border rounded"
-                    placeholder="Enter title"
-                  />
-                  <input
-                    type="file"
-                    onChange={(e) => setNewImage(e.target.files[0])}
-                    className="mt-2"
-                  />
-                </div>
-
-                <div className="mt-4">
-                  <button
-                    type="button"
-                    className="inline-flex justify-center rounded-md border border-transparent bg-blue-100 px-4 py-2 text-sm font-medium text-blue-900 hover:bg-blue-200 focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-2"
-                    onClick={handleSave}
-                  >
-                    Save
-                  </button>
-                </div>
-              </Dialog.Panel>
-            </Transition.Child>
-          </div>
-        </div>
-      </Dialog>
-    </Transition>
-  );
-};
-
-const DeleteConfirmationModal = ({ isOpen, closeModal, onConfirm, imageName }) => {
-  return (
-    <Transition appear show={isOpen} as={React.Fragment}>
-      <Dialog as="div" className="relative z-10" onClose={closeModal}>
-        <Transition.Child
-          as={React.Fragment}
-          enter="ease-out duration-300"
-          enterFrom="opacity-0"
-          enterTo="opacity-100"
-          leave="ease-in duration-200"
-          leaveFrom="opacity-100"
-          leaveTo="opacity-0"
-        >
-          <div className="fixed inset-0 bg-black bg-opacity-25" />
-        </Transition.Child>
-
-        <div className="fixed inset-0 overflow-y-auto">
-          <div className="flex min-h-full items-center justify-center p-4 text-center">
-            <Transition.Child
-              as={React.Fragment}
-              enter="ease-out duration-300"
-              enterFrom="opacity-0 scale-95"
-              enterTo="opacity-100 scale-100"
-              leave="ease-in duration-200"
-              leaveFrom="opacity-100 scale-100"
-              leaveTo="opacity-0 scale-95"
-            >
-              <Dialog.Panel className="w-full max-w-md transform overflow-hidden rounded-2xl bg-white p-6 text-left align-middle shadow-xl transition-all">
-                <Dialog.Title
-                  as="h3"
-                  className="text-lg font-medium leading-6 text-gray-900"
-                >
-                  Delete Confirmation
-                </Dialog.Title>
-                <div className="mt-2">
-                  <p className="text-sm text-gray-500">
-                    Are you sure you want to delete the image "{imageName}"? This action cannot be undone.
-                  </p>
-                </div>
-
-                <div className="mt-4 flex justify-end space-x-2">
-                  <button
-                    type="button"
-                    className="inline-flex justify-center rounded-md border border-transparent bg-gray-100 px-4 py-2 text-sm font-medium text-gray-900 hover:bg-gray-200 focus:outline-none focus-visible:ring-2 focus-visible:ring-gray-500 focus-visible:ring-offset-2"
-                    onClick={closeModal}
-                  >
-                    Cancel
-                  </button>
-                  <button
-                    type="button"
-                    className="inline-flex justify-center rounded-md border border-transparent bg-red-100 px-4 py-2 text-sm font-medium text-red-900 hover:bg-red-200 focus:outline-none focus-visible:ring-2 focus-visible:ring-red-500 focus-visible:ring-offset-2"
-                    onClick={onConfirm}
-                  >
-                    Delete
-                  </button>
-                </div>
-              </Dialog.Panel>
-            </Transition.Child>
-          </div>
-        </div>
-      </Dialog>
-    </Transition>
-  );
-};
 
 const ImageGallery = () => {
-  const dispatch = useDispatch();
-  const { images, status, error } = useSelector((state) => state.images);
-  const [items, setItems] = useState([]);
-  const [editingImage, setEditingImage] = useState(null);
-  const [isEditModalOpen, setIsEditModalOpen] = useState(false);
-  const [isDeletingImage, setIsDeletingImage] = useState(null);
-  const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
-
-  const sensors = useSensors(
-    useSensor(PointerSensor),
-    useSensor(KeyboardSensor, {
-      coordinateGetter: sortableKeyboardCoordinates,
-    })
-  );
-
-  useEffect(() => {
-    dispatch(fetchImages());
-  }, [dispatch]);
-
-  useEffect(() => {
-    setItems(images);
-  }, [images]);
+    const dispatch = useDispatch();
+    const { images, status, error } = useSelector((state) => state.images);
+    const [items, setItems] = useState([]);
+    const [editingImage, setEditingImage] = useState(null);
+    const [isEditModalOpen, setIsEditModalOpen] = useState(false);
+    const [isDeletingImage, setIsDeletingImage] = useState(null);
+    const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
+  
+    const sensors = useSensors(
+      useSensor(PointerSensor),
+      useSensor(KeyboardSensor, {
+        coordinateGetter: sortableKeyboardCoordinates,
+      })
+    );
+  
+    useEffect(() => {
+      dispatch(fetchImages());
+    }, [dispatch]);
+  
+    useEffect(() => {
+      setItems(images);
+    }, [images]);
 
   const handleDragEnd = useCallback((event) => {
     const { active, over } = event;
@@ -281,30 +138,34 @@ const ImageGallery = () => {
     }
   }, [isDeletingImage, dispatch]);
 
-  if (status === 'loading') return <div>Loading...</div>;
-  if (status === 'failed') return <div>Error: {error}</div>;
+  if (status === 'loading') return <div className="flex justify-center items-center h-64">Loading...</div>;
+  if (status === 'failed') return <div className="flex justify-center items-center h-64 text-red-500">Error: {error}</div>;
 
   return (
     <div className="p-4">
-      <DndContext 
-        sensors={sensors}
-        collisionDetection={closestCenter}
-        onDragEnd={handleDragEnd}
-      >
-        <SortableContext items={items.map(item => item.id)}>
-          <div className="grid grid-cols-3 gap-4">
-            {items.map((image) => (
-              <SortableItem 
-                key={image.id} 
-                id={image.id} 
-                image={image} 
-                onEdit={handleEdit}
-                onDelete={handleDelete}
-              />
-            ))}
-          </div>
-        </SortableContext>
-      </DndContext>
+      {items.length === 0 ? (
+        <EmptyGallery />
+      ) : (
+        <DndContext 
+          sensors={sensors}
+          collisionDetection={closestCenter}
+          onDragEnd={handleDragEnd}
+        >
+          <SortableContext items={items.map(item => item.id)}>
+            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
+              {items.map((image) => (
+                <SortableItem 
+                  key={image.id} 
+                  id={image.id} 
+                  image={image} 
+                  onEdit={handleEdit}
+                  onDelete={handleDelete}
+                />
+              ))}
+            </div>
+          </SortableContext>
+        </DndContext>
+      )}
       
       <EditModal
         isOpen={isEditModalOpen}
