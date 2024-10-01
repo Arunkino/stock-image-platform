@@ -1,6 +1,32 @@
 import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
 import axiosInstance from '../../utils/axiosConfig';
 
+export const forgotPassword = createAsyncThunk(
+    'auth/forgotPassword',
+    async (data, { rejectWithValue }) => {
+      try {
+        const response = await axiosInstance.post('forgot-password/', data);
+        console.log(response)
+        return response.data;
+      } catch (error) {
+        return rejectWithValue(error.response.data);
+      }
+    }
+  );
+  
+export const resetPassword = createAsyncThunk(
+    'auth/resetPassword',
+    async (data, { rejectWithValue }) => {
+      try {
+        const response = await axiosInstance.post('reset-password/', data);
+        return response.data;
+      } catch (error) {
+        return rejectWithValue(error.response.data);
+      }
+    }
+  );
+  
+
 export const login = createAsyncThunk(
   'auth/login',
   async (userData, thunkAPI) => {
@@ -60,6 +86,28 @@ const authSlice = createSlice({
   },
   extraReducers: (builder) => {
     builder
+    .addCase(forgotPassword.pending, (state) => {
+        state.isLoading = true;
+        state.error = null;
+      })
+      .addCase(forgotPassword.fulfilled, (state) => {
+        state.isLoading = false;
+      })
+      .addCase(forgotPassword.rejected, (state, action) => {
+        state.isLoading = false;
+        state.error = action.payload;
+      })
+      .addCase(resetPassword.pending, (state) => {
+        state.isLoading = true;
+        state.error = null;
+      })
+      .addCase(resetPassword.fulfilled, (state) => {
+        state.isLoading = false;
+      })
+      .addCase(resetPassword.rejected, (state, action) => {
+        state.isLoading = false;
+        state.error = action.payload;
+      })
       .addCase(login.fulfilled, (state, action) => {
         state.isLoading = false;
         state.user = action.payload.user;
@@ -68,10 +116,15 @@ const authSlice = createSlice({
       .addCase(login.pending, (state) => {
         state.isLoading = true;
       })
+      .addCase(login.rejected, (state,action) => {
+        state.isLoading = false;
+        state.error = action.payload.error;
+      })
       .addCase(register.fulfilled, (state, action) => {
         state.isLoading = false;
         state.user = action.payload.user;
         state.token = action.payload.token;
+        state.error = null;
       })
       .addCase(checkAuthStatus.pending, (state) => {
         state.isLoading = true;

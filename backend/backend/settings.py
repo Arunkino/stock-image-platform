@@ -161,3 +161,7 @@ AUTH_USER_MODEL = 'users.CustomUser'
 # Configure media files
 MEDIA_URL = '/media/'
 MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
+
+EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
+# Default from email
+DEFAULT_FROM_EMAIL = 'noreply@yourapp.com'

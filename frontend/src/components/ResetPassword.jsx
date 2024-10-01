@@ -1,31 +1,28 @@
 import React, { useState } from 'react';
-import { useDispatch, useSelector } from 'react-redux';
-import { login } from '../features/auth/authSlice';
+import { useDispatch } from 'react-redux';
+import { resetPassword } from '../features/auth/authSlice';
 import { toast } from 'react-hot-toast';
-import { Link, useNavigate } from 'react-router-dom';
+import { useParams, useNavigate } from 'react-router-dom';
 
-const Login = () => {
-  const [formData, setFormData] = useState({
-    username: '',
-    password: '',
-  });
-
+const ResetPassword = () => {
+  const [newPassword, setNewPassword] = useState('');
+  const [confirmPassword, setConfirmPassword] = useState('');
   const dispatch = useDispatch();
   const navigate = useNavigate();
-  const { isLoading, error } = useSelector((state) => state.auth);
-
-  const handleChange = (e) => {
-    setFormData({ ...formData, [e.target.name]: e.target.value });
-  };
+  const { uid, token } = useParams();
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    if (newPassword !== confirmPassword) {
+      toast.error("Passwords don't match");
+      return;
+    }
     try {
-      await dispatch(login(formData)).unwrap();
-      toast.success('Login successful!');
-      navigate('/dashboard');
+      await dispatch(resetPassword({ uid, token, new_password: newPassword })).unwrap();
+      toast.success('Password reset successful');
+      navigate('/login');
     } catch (error) {
-      toast.error('Login failed: ' + JSON.stringify(error.error));
+      toast.error('Failed to reset password: ' + error.message);
     }
   };
 
@@ -33,60 +30,46 @@ const Login = () => {
     <div className="min-h-screen flex items-center justify-center bg-gray-50 py-12 px-4 sm:px-6 lg:px-8">
       <div className="max-w-md w-full space-y-8">
         <div>
-          <h2 className="mt-6 text-center text-3xl font-extrabold text-gray-900">Login</h2>
+          <h2 className="mt-6 text-center text-3xl font-extrabold text-gray-900">Reset Password</h2>
         </div>
         <form className="mt-8 space-y-6" onSubmit={handleSubmit}>
           <div className="rounded-md shadow-sm -space-y-px">
             <div>
               <input
-                name="username"
-                type="text"
+                name="newPassword"
+                type="password"
                 required
                 className="appearance-none rounded-none relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 rounded-t-md focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 focus:z-10 sm:text-sm"
-                placeholder="Username"
-                value={formData.username}
-                onChange={handleChange}
+                placeholder="New Password"
+                value={newPassword}
+                onChange={(e) => setNewPassword(e.target.value)}
               />
             </div>
             <div>
               <input
-                name="password"
+                name="confirmPassword"
                 type="password"
                 required
                 className="appearance-none rounded-none relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 rounded-b-md focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 focus:z-10 sm:text-sm"
-                placeholder="Password"
-                value={formData.password}
-                onChange={handleChange}
+                placeholder="Confirm New Password"
+                value={confirmPassword}
+                onChange={(e) => setConfirmPassword(e.target.value)}
               />
             </div>
           </div>
-
-          {error && <p className="text-red-500 text-sm">{error}</p>}
 
           <div>
             <button
               type="submit"
               className="group relative w-full flex justify-center py-2 px-4 border border-transparent text-sm font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
-              disabled={isLoading}
             >
-              {isLoading ? 'Logging in...' : 'Login'}
+              Reset Password
             </button>
           </div>
         </form>
-        <div className="text-sm">
-          <Link to="/register" className="font-medium text-indigo-400 hover:text-indigo-200">
-            Don't have an account? Register here
-          </Link>
-          <br/>
-          <Link to="/forgot-password" className="font-medium text-red-400 hover:text-red-200">
-            Forgot your password?
-          </Link>
-       
-          
-        </div>
       </div>
     </div>
   );
 };
 
-export default Login;
+export default ResetPassword;
