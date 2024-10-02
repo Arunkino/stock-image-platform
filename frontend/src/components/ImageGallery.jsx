@@ -184,4 +184,4 @@ const ImageGallery = () => {
   );
 };
 
-export default React.memo(ImageGallery);
+export default ImageGallery;
