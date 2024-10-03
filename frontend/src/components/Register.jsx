@@ -23,26 +23,40 @@ const Register = () => {
   };
 
   const handleSubmit = (e) => {
-    e.preventDefault();
-    if (formData.password !== confirmPassword) {
-        toast.error("Passwords don't match");
-        return;
-      }
-    setIsLoading(true);
+  e.preventDefault();
+  if (formData.password !== confirmPassword) {
+    toast.error("Passwords don't match");
+    return;
+  }
+  setIsLoading(true);
 
-    dispatch(register(formData))
-      .unwrap()
-      .then(() => {
-        
-        toast.success('Registration successful!');
-        navigate('/')
-      })
-      .catch((error) => {
-        toast.error('Registration failed: ' + JSON.stringify(error));
-      }).finally(() => {
-        setIsLoading(false);
-      });
-  };
+  dispatch(register(formData))
+    .unwrap()
+    .then(() => {
+      toast.success('Registration successful!');
+      navigate('/');
+    })
+    .catch((error) => {
+      if (typeof error === 'object' && error !== null) {
+        // Handle structured error responses
+        Object.entries(error).forEach(([field, messages]) => {
+          if (Array.isArray(messages)) {
+            messages.forEach(message => {
+              toast.error(`${field}: ${message}`);
+            });
+          } else if (typeof messages === 'string') {
+            toast.error(`${field}: ${messages}`);
+          }
+        });
+      } else {
+        // Fallback for unexpected error formats
+        toast.error('Registration failed: ' + (error.message || 'Unknown error'));
+      }
+    })
+    .finally(() => {
+      setIsLoading(false);
+    });
+};
   {if(isLoading){
     return(<LoadingSpinner/>)
   }}
